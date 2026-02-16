@@ -15,10 +15,52 @@ library(mosaicData)
 
 ### Exercise 1
 
-Remove this text, and add your answer for Exercise 1 here.
-Add code chunks as needed.
-Don't forget to label your code chunk.
-Do not use spaces in code chunk labels.
+# Data prep
+
+```{r Ex1-data-rep}
+staff <- read_csv("data/instructional-staff.csv")
+
+staff_long <- staff %>%
+  pivot_longer(cols = -faculty_type, names_to = "year") %>%
+  mutate(value = as.numeric(value))
+
+staff_long
+
+staff_long %>%
+  ggplot(aes(x = year, y = value, color = faculty_type)) +
+  geom_line()
+```
+
+# An early attempt
+
+```{r Ex1-early-attempt}
+staff_long %>%
+  ggplot(aes(
+    x = year,
+    y = value,
+    group = faculty_type,
+    color = faculty_type
+  )) +
+  geom_line()
+```
+
+# Fix the plot
+
+```{r Ex1-fix}
+staff_plot <- 
+  ggplot(staff_long, aes(
+    x = year,
+    y = value,
+    group = faculty_type,
+    color = faculty_type
+  )) +
+  labs(title = "Instructional Staff Employment Trends", x = "Year", y = "Percentage", color = "Faculty Type") +
+  theme(plot.title = element_text(hjust = 0.5)) +
+  geom_line()
+
+ggsave(staff_plot, file="staff_plot.pdf", width = 12, height = 4)
+
+```
 
 ### Exercise 2
 
