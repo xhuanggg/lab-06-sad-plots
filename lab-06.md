@@ -96,9 +96,24 @@ ggsave(staff_plot, file="staff_plot.pdf", width = 12, height = 4)
 
 ### Exercise 2
 
-Remove this text, and add your answer for Exercise 1 here. Add code
-chunks as needed. Don’t forget to label your code chunk. Do not use
-spaces in code chunk labels.
+``` r
+part_time_staff <- staff[4, ] %>%
+  pivot_longer(cols = -faculty_type, names_to = "year") %>%
+  mutate(value = as.numeric(value))
+
+part_time_staff_plot <- 
+  ggplot(part_time_staff, aes(
+    x = year,
+    y = value,
+    group = faculty_type,
+    color = faculty_type
+  )) +
+  labs(title = "Instructional Staff Employment Trends", x = "Year", y = "Percentage", color = "Faculty Type") +
+  theme(plot.title = element_text(hjust = 0.5)) +
+  geom_line()
+
+ggsave(part_time_staff_plot, file="part_time_staff_plot.pdf", width = 12, height = 4)
+```
 
 ### Exercise 3
 
