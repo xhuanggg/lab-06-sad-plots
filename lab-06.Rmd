@@ -85,6 +85,56 @@ ggsave(part_time_staff_plot, file="part_time_staff_plot.pdf", width = 12, height
 
 ### Exercise 3
 
-...
+My idea is to onlt visualize the 10 most productive countries and lable the rest as others.
+```{r Ex3}
+fisheries <- read_csv("data/fisheries.csv")
 
-Add exercise headings as needed.
+fisheries <- fisheries %>% 
+  arrange(desc(total))
+
+other_capture <- sum(fisheries$capture[-(1:10)])
+other_aquaculture <- sum(fisheries$aquaculture[-(1:10)])
+other_total <- other_capture + other_aquaculture
+
+fisheries_1 <- fisheries %>% 
+  slice(1:10) %>% 
+  #add_row(country = "Other", capture = other_capture, aquaculture = other_aquaculture, total = other_total) %>% 
+  mutate(country = factor(country, levels = unique(country))) %>% 
+  pivot_longer(cols = -country,
+               names_to = "type",
+               values_to = "value")
+  
+
+fisheries_line <- ggplot(fisheries_1, aes(x = country,
+                      y = value,
+                      color = type,
+                      group = type)) +
+  geom_line() +
+  geom_point() +
+  labs(title = "Countries with highest production", x = "Country", y = "Production", color = "Type") +
+  theme(plot.title = element_text(hjust = 0.5))
+
+ggsave(fisheries_line, file="fisheries_line.pdf", width = 12, height = 4)
+
+fisheries_2 <- fisheries %>% 
+  slice(1:10) %>% 
+  add_row(country = "Other", capture = other_capture, aquaculture = other_aquaculture, total = other_total) %>% 
+  mutate(country = factor(country, levels = unique(country))) 
+
+ggplot(fisheries_2, aes(x = "", y = capture, fill = country)) +
+  geom_col(width = 1) +
+  coord_polar(theta = "y") +
+  theme_void() +
+  labs(title = "Capture by country", fill = "Country") +
+  theme(plot.title = element_text(hjust = 0.5))
+
+ggplot(fisheries_2, aes(x = "", y = aquaculture, fill = country)) +
+  geom_col(width = 1) +
+  coord_polar(theta = "y") +
+  theme_void() +
+  labs(title = "Aquaculture by country", fill = "Country") +
+  theme(plot.title = element_text(hjust = 0.5))
+```
+
+
+

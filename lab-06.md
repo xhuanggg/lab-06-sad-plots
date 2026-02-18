@@ -117,6 +117,72 @@ ggsave(part_time_staff_plot, file="part_time_staff_plot.pdf", width = 12, height
 
 ### Exercise 3
 
-…
+My idea is to onlt visualize the 10 most productive countries and lable
+the rest as others.
 
-Add exercise headings as needed.
+``` r
+fisheries <- read_csv("data/fisheries.csv")
+```
+
+    ## Rows: 216 Columns: 4
+    ## ── Column specification ────────────────────────────────────────────────────────
+    ## Delimiter: ","
+    ## chr (1): country
+    ## dbl (3): capture, aquaculture, total
+    ## 
+    ## ℹ Use `spec()` to retrieve the full column specification for this data.
+    ## ℹ Specify the column types or set `show_col_types = FALSE` to quiet this message.
+
+``` r
+fisheries <- fisheries %>% 
+  arrange(desc(total))
+
+other_capture <- sum(fisheries$capture[-(1:10)])
+other_aquaculture <- sum(fisheries$aquaculture[-(1:10)])
+other_total <- other_capture + other_aquaculture
+
+fisheries_1 <- fisheries %>% 
+  slice(1:10) %>% 
+  #add_row(country = "Other", capture = other_capture, aquaculture = other_aquaculture, total = other_total) %>% 
+  mutate(country = factor(country, levels = unique(country))) %>% 
+  pivot_longer(cols = -country,
+               names_to = "type",
+               values_to = "value")
+  
+
+fisheries_line <- ggplot(fisheries_1, aes(x = country,
+                      y = value,
+                      color = type,
+                      group = type)) +
+  geom_line() +
+  geom_point() +
+  labs(title = "Countries with highest production", x = "Country", y = "Production", color = "Type") +
+  theme(plot.title = element_text(hjust = 0.5))
+
+ggsave(fisheries_line, file="fisheries_line.pdf", width = 12, height = 4)
+
+fisheries_2 <- fisheries %>% 
+  slice(1:10) %>% 
+  add_row(country = "Other", capture = other_capture, aquaculture = other_aquaculture, total = other_total) %>% 
+  mutate(country = factor(country, levels = unique(country))) 
+
+ggplot(fisheries_2, aes(x = "", y = capture, fill = country)) +
+  geom_col(width = 1) +
+  coord_polar(theta = "y") +
+  theme_void() +
+  labs(title = "Capture by country", fill = "Country") +
+  theme(plot.title = element_text(hjust = 0.5))
+```
+
+![](lab-06_files/figure-gfm/Ex3-1.png)<!-- -->
+
+``` r
+ggplot(fisheries_2, aes(x = "", y = aquaculture, fill = country)) +
+  geom_col(width = 1) +
+  coord_polar(theta = "y") +
+  theme_void() +
+  labs(title = "Aquaculture by country", fill = "Country") +
+  theme(plot.title = element_text(hjust = 0.5))
+```
+
+![](lab-06_files/figure-gfm/Ex3-2.png)<!-- -->
