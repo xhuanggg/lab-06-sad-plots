@@ -11,6 +11,7 @@ output: github_document
 library(tidyverse) 
 library(dsbox)
 library(mosaicData) 
+library(performance)
 ```
 
 ### Exercise 1
@@ -135,6 +136,95 @@ ggplot(fisheries_2, aes(x = "", y = aquaculture, fill = country)) +
   labs(title = "Aquaculture by country", fill = "Country") +
   theme(plot.title = element_text(hjust = 0.5))
 ```
+
+# Stretch Practice with Smokers in Whickham
+
+### Exercise 1
+
+The data is observational because it is very unlikely to randomly assign people to smoking or not smoking and see how it would turn out in 20 years.
+```{r Ex1-1}
+data(Whickham)
+
+?Whickham
+#performance::compare_performance() # might not be behaving as intended. Did not work.
+```
+
+### Exercise 2
+
+There are 1,314 observations, each of which represent an individual recorded in the study.
+```{r Ex2-1}
+glimpse(Whickham)
+```
+
+### Exercise 3
+
+There three variables. Outcome is a categorical variable representing whether the individual was alive after 20 years, smoker is a cateogrical variable representing smoking status at baseline, and age is a continuous variable representing age at the time of the first survey.
+
+```{r Ex3-1}
+ggplot(Whickham, aes(x = outcome)) +
+  geom_bar() +
+  labs(title = "Outcome after 20 years") +
+  theme(plot.title = element_text(hjust = 0.5))
+
+ggplot(Whickham, aes(x = smoker)) +
+  geom_bar() +
+  labs(title = "Smoking status at baseline") +
+  theme(plot.title = element_text(hjust = 0.5))
+
+ggplot(Whickham, aes(x = age)) +
+  geom_histogram() +
+  labs(title = "Age at first survey") +
+  theme(plot.title = element_text(hjust = 0.5))
+```
+
+### Exercise 4
+
+Smoking status should predict bad health outcome.
+
+### Exercise 5
+
+The visualization does not meet my expectations because there were a higher proportion of individuals alive among smokers.
+```{r Ex5-1}
+ggplot(Whickham, aes(x = outcome, fill = smoker)) +
+  geom_bar() +
+  labs(title = "Health outcome and smoking status", fill = "Smoking status") +
+  theme(plot.title = element_text(hjust = 0.5))
+
+Whickham %>%
+  count(smoker, outcome)
+```
+
+### Exercise 6
+
+```{r Ex6-1}
+Whickham <- Whickham %>%
+  mutate(age_cat = case_when(
+    age <= 44 ~ "18-44",
+    age > 44 & age <= 64 ~ "45-64",
+    age > 64 ~ "65+"
+  )) %>% 
+  mutate(age_cat = as.factor(age_cat))
+```
+
+### Exercise 7
+
+Now the relationship between smoking status and health outcome is moderated by age group. Smoking status does not seem to have a strong relationship between health status among individuals between 18 to 64. But most smokers over 65 were dead. This is because age at the first survey is a lurking variable. The harm of smoking are onset at older ages. Therefore, younger smokers at baseline reported similar health status as non-smoker after 20 years.
+```{r Ex7-1}
+cool_plot <- ggplot(Whickham, aes(x = outcome, fill = smoker)) +
+  geom_bar() +
+  facet_wrap(~age_cat) +
+  coord_flip()
+
+ggsave(
+  cool_plot,
+  filename = "cool_plot.png",
+  width = 16, height = 4, units = "in", dpi = 300
+)
+
+Whickham %>%
+  count(smoker, age_cat, outcome)
+```
+
 
 
 
