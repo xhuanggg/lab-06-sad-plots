@@ -97,6 +97,9 @@ ggsave(staff_plot, file="staff_plot.pdf", width = 12, height = 4)
 
 ### Exercise 2
 
+A reasonable change would be showing how the percentage of part-time
+faculty member has changed over time. That is, adding an axis of years.
+
 ``` r
 part_time_staff <- staff[4, ] %>%
   pivot_longer(cols = -faculty_type, names_to = "year") %>%
